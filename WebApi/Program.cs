@@ -1,9 +1,19 @@
+using Infrastructure;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<ApplicationDbContext>(
+    dbContextOptionsBuilder =>
+    {
+        var connectionString = builder.Configuration.GetConnectionString("Database");
+        dbContextOptionsBuilder.UseSqlServer(connectionString);
+    });
 
 builder
     .Services
     .Scan(selector => selector
-        .FromAssemblies(Infrastructure.AssemblyReference.Assembly)
+        .FromAssemblies(AssemblyReference.Assembly)
         .AddClasses(false)
         .AsImplementedInterfaces()
         .WithScopedLifetime());
@@ -23,6 +33,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 app.Run();

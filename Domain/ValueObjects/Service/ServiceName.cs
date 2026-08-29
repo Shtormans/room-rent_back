@@ -1,12 +1,11 @@
 using Domain.Primitives;
 using Domain.Shared;
-using Domain.ValueObjects.Room;
 
 namespace Domain.ValueObjects.Service;
 
 public sealed class ServiceName : ValueObject
 {
-    private const int MaxLength = 30;
+    public const int MaxLength = 30;
 
     private ServiceName(string value)
     {
@@ -19,12 +18,12 @@ public sealed class ServiceName : ValueObject
     {
         if (string.IsNullOrWhiteSpace(serviceName))
         {
-            return Result.Failure<ServiceName>(new Error("ServiceName.Empty"));
+            return Result.Failure<ServiceName>(new Error("ServiceName.Empty", "Service name is empty."));
         }
 
         if (serviceName.Length > MaxLength)
         {
-            return Result.Failure<ServiceName>(new Error("ServiceName.TooLong"));
+            return Result.Failure<ServiceName>(new Error("ServiceName.TooLong", $"Service name must not exceed {MaxLength} characters."));
         }
         
         return new ServiceName(serviceName);
@@ -33,5 +32,10 @@ public sealed class ServiceName : ValueObject
     public override IEnumerable<object> GetAtomicValues()
     {
         yield return Value;
+    }
+    
+    public static implicit operator string(ServiceName serviceName)
+    {
+        return serviceName.Value;
     }
 }

@@ -5,7 +5,7 @@ namespace Domain.ValueObjects.Room;
 
 public sealed class RoomName : ValueObject
 {
-    private const int MaxLength = 30;
+    public const int MaxLength = 30;
 
     private RoomName(string value)
     {
@@ -18,12 +18,12 @@ public sealed class RoomName : ValueObject
     {
         if (string.IsNullOrWhiteSpace(roomName))
         {
-            return Result.Failure<RoomName>(new Error("RoomName.Empty"));
+            return Result.Failure<RoomName>(new Error("RoomName.Empty", "Room name is empty."));
         }
 
         if (roomName.Length > MaxLength)
         {
-            return Result.Failure<RoomName>(new Error("RoomName.TooLong"));
+            return Result.Failure<RoomName>(new Error("RoomName.TooLong", $"Room name must not exceed {MaxLength} characters."));
         }
         
         return new RoomName(roomName);
@@ -32,5 +32,10 @@ public sealed class RoomName : ValueObject
     public override IEnumerable<object> GetAtomicValues()
     {
         yield return Value;
+    }
+    
+    public static implicit operator string(RoomName roomName)
+    {
+        return roomName.Value;
     }
 }
