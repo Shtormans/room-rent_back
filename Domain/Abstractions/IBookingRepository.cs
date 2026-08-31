@@ -5,10 +5,10 @@ namespace Domain.Abstractions;
 
 public interface IBookingRepository
 {
-    public void Add(BookingDto booking);
+    public void Add(BookingSnapshot booking);
     
-    public Task<List<BookingDto>> GetAll(CancellationToken cancellationToken);
-    public Task<BookingDto?> GetById(Guid id, CancellationToken cancellationToken);
+    public Task<List<BookingSnapshot>> GetAll(CancellationToken cancellationToken);
+    public Task<BookingSnapshot?> GetById(Guid id, CancellationToken cancellationToken);
     
     public Task<bool> TryDelete(Guid id, CancellationToken cancellationToken);
     

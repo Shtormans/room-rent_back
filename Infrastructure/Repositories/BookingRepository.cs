@@ -1,6 +1,5 @@
 using Domain.Abstractions;
 using Domain.Entities;
-using Domain.Shared;
 using Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,21 +7,22 @@ namespace Infrastructure.Repositories;
 
 public class BookingRepository(ApplicationDbContext dbContext) : IBookingRepository
 {
-    public void Add(BookingDto booking)
+    public void Add(BookingSnapshot booking)
     {
         Booking entity = ConvertToEntity(booking);
         dbContext.Set<Booking>().Add(entity);
     }
 
-    public async Task<List<BookingDto>> GetAll(CancellationToken cancellationToken)
+    public async Task<List<BookingSnapshot>> GetAll(CancellationToken cancellationToken)
     {
         return await dbContext.Set<Booking>()
+            .AsNoTracking()
             .Include(booking => booking.BookingServices)
-            .Select(booking => ConvertToDto(booking))
+            .Select(booking => ConvertToSnapshot(booking))
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<BookingDto?> GetById(Guid id, CancellationToken cancellationToken)
+    public async Task<BookingSnapshot?> GetById(Guid id, CancellationToken cancellationToken)
     {
         Booking? entity = await GetDatabaseObjectById(id, false, cancellationToken);
 
@@ -31,7 +31,7 @@ public class BookingRepository(ApplicationDbContext dbContext) : IBookingReposit
             return null;
         }
 
-        return ConvertToDto(entity);
+        return ConvertToSnapshot(entity);
     }
 
     public async Task<bool> TryDelete(Guid id, CancellationToken cancellationToken)
@@ -97,9 +97,9 @@ public class BookingRepository(ApplicationDbContext dbContext) : IBookingReposit
         return await query.FirstOrDefaultAsync(booking => booking.Id == id, cancellationToken);
     }
     
-    private static BookingDto ConvertToDto(Booking entity)
+    private static BookingSnapshot ConvertToSnapshot(Booking entity)
     {
-        return new BookingDto(entity.Id)
+        return new BookingSnapshot(entity.Id)
         {
             RoomId = entity.RoomId,
             Start = entity.Start,
@@ -109,23 +109,23 @@ public class BookingRepository(ApplicationDbContext dbContext) : IBookingReposit
         };
     }
 
-    private static Booking ConvertToEntity(BookingDto dto)
+    private static Booking ConvertToEntity(BookingSnapshot snapshot)
     {
-        List<BookingService> bookingServices = dto
+        List<BookingService> bookingServices = snapshot
             .Services
             .Select(serviceId => new BookingService
             {
-                BookingId = dto.Id,
+                BookingId = snapshot.Id,
                 ServiceId = serviceId
             }).ToList();
 
         return new Booking
         {
-            Id = dto.Id,
-            RoomId = dto.RoomId,
-            Start = dto.Start,
-            End = dto.End,
-            Price = dto.Price,
+            Id = snapshot.Id,
+            RoomId = snapshot.RoomId,
+            Start = snapshot.Start,
+            End = snapshot.End,
+            Price = snapshot.Price,
             BookingServices = bookingServices
         };
     }

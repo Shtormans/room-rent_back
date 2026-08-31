@@ -4,9 +4,11 @@ namespace Domain.Abstractions;
 
 public interface IBookingTimeDiscountRepository
 {
-    public void Add(BookingTimeDiscountDto discount);
+    public void Add(BookingTimeDiscountSnapshot discount);
+    public Task<List<BookingTimeDiscountSnapshot>> GetAll(CancellationToken cancellationToken);
     
-    public Task<List<BookingTimeDiscountDto>> GetAll(CancellationToken cancellationToken);
+    public Task<bool> TryUpdate(BookingTimeDiscountSnapshot updatediscount, CancellationToken cancellationToken);
+    public Task<bool> TryDelete(Guid id, CancellationToken cancellationToken);
     
-    public Task<BookingTimeDiscountDto?> GetDiscount(TimeOnly bookTime, CancellationToken cancellationToken);
+    public Task<BookingTimeDiscountSnapshot?> GetDiscount(TimeOnly bookTime, CancellationToken cancellationToken);
 }

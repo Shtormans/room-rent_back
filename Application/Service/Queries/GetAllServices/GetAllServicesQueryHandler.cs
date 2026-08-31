@@ -5,7 +5,7 @@ using Domain.Shared;
 
 namespace Application.Service.Queries.GetAllServices;
 
-public class GetAllServicesQueryHandler : IQueryHandler<GetAllServicesQuery, List<ServiceDto>>
+public class GetAllServicesQueryHandler : IQueryHandler<GetAllServicesQuery, List<ServiceSnapshot>>
 {
     private readonly IServiceRepository _serviceRepository;
 
@@ -14,7 +14,7 @@ public class GetAllServicesQueryHandler : IQueryHandler<GetAllServicesQuery, Lis
         _serviceRepository = serviceRepository;
     }
 
-    public async Task<Result<List<ServiceDto>>> Handle(GetAllServicesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<ServiceSnapshot>>> Handle(GetAllServicesQuery request, CancellationToken cancellationToken)
     {
         return await _serviceRepository.GetAll(cancellationToken);
     }

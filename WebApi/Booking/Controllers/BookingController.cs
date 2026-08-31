@@ -7,10 +7,12 @@ using Domain.Entities;
 using Domain.Shared;
 using Domain.Utils;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Abstractions;
 using WebApi.Booking.Requests;
 using WebApi.Booking.Responses;
+using WebApi.Constants;
 
 namespace WebApi.Booking.Controllers;
 
@@ -23,7 +25,7 @@ public class BookingController(ISender sender) : ApiController(sender)
     public async Task<IActionResult> GetBookings(CancellationToken cancellationToken)
     {
         GetAllBookingQuery query = new();
-        Result<List<BookingDto>> result = await Sender.Send(query, cancellationToken);
+        Result<List<BookingSnapshot>> result = await Sender.Send(query, cancellationToken);
         
         return Ok(result.Value);
     }
@@ -35,7 +37,7 @@ public class BookingController(ISender sender) : ApiController(sender)
     public async Task<IActionResult> GetBookingById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         GetBookingByIdQuery query = new(id);
-        Result<BookingDto> result = await Sender.Send(query, cancellationToken);
+        Result<BookingSnapshot> result = await Sender.Send(query, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -47,6 +49,7 @@ public class BookingController(ISender sender) : ApiController(sender)
 
     [HttpDelete]
     [Route("{id:guid}")]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteBookingById([FromRoute] Guid id, CancellationToken cancellationToken)

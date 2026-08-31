@@ -6,7 +6,7 @@ using Domain.Shared;
 
 namespace Application.Booking.Queries.GetBookingById;
 
-public class GetBookingByIdQueryHandler : IQueryHandler<GetBookingByIdQuery, BookingDto>
+public class GetBookingByIdQueryHandler : IQueryHandler<GetBookingByIdQuery, BookingSnapshot>
 {
     private readonly IBookingRepository _bookingRepository;
 
@@ -15,13 +15,13 @@ public class GetBookingByIdQueryHandler : IQueryHandler<GetBookingByIdQuery, Boo
         _bookingRepository = bookingRepository;
     }
 
-    public async Task<Result<BookingDto>> Handle(GetBookingByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<BookingSnapshot>> Handle(GetBookingByIdQuery request, CancellationToken cancellationToken)
     {
         var room = await _bookingRepository.GetById(request.Id, cancellationToken);
 
         if (room is null)
         {
-            return Result.Failure<BookingDto>(BookingErrors.Helpers.NotFound(request.Id));
+            return Result.Failure<BookingSnapshot>(BookingErrors.Helpers.NotFound(request.Id));
         }
 
         return room;

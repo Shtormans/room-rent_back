@@ -51,7 +51,7 @@ public class CreateRoomCommandHandler : ICommandHandler<CreateRoomCommand, Guid>
             }
         }
         
-        var room = RoomDto.Create(roomNameResult.Value, roomCapacityResult.Value, roomRentalRateResult.Value, request.Services);
+        var room = RoomSnapshot.Create(roomNameResult.Value, roomCapacityResult.Value, roomRentalRateResult.Value, request.Services);
         
         _roomRepository.Add(room);
         await _unitOfWork.SaveChanges(cancellationToken);

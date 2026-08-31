@@ -4,7 +4,7 @@ using Domain.Entities;
 using Domain.Errors;
 using Domain.Shared;
 
-namespace Application.Discount.Commands;
+namespace Application.Discount.Commands.CreateBookingTimeDiscount;
 
 public class CreateBookingTimeDiscountCommandHandler : ICommandHandler<CreateBookingTimeDiscountCommand, Guid>
 {
@@ -24,12 +24,12 @@ public class CreateBookingTimeDiscountCommandHandler : ICommandHandler<CreateBoo
             return Result.Failure<Guid>(DiscountErrors.Helpers.InvalidEndTime);
         }
 
-        if (request.DiscountPercentage <= 0)
+        if (request.DiscountPercentage is <= 0 or > 1)
         {
             return Result.Failure<Guid>(DiscountErrors.Helpers.InvalidDiscountPercentage);
         }
 
-        var dto = BookingTimeDiscountDto.Create(request.From, request.To, request.DiscountPercentage);
+        var dto = BookingTimeDiscountSnapshot.Create(request.From, request.To, request.DiscountPercentage);
         
         _bookingTimeDiscountRepository.Add(dto);
         await _unitOfWork.SaveChanges(cancellationToken);

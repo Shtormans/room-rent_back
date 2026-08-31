@@ -6,8 +6,10 @@ using Application.Service.Queries.GetServiceById;
 using Domain.Errors;
 using Domain.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Abstractions;
+using WebApi.Constants;
 using WebApi.Service.Requests;
 using WebApi.Service.Responses;
 
@@ -18,6 +20,7 @@ namespace WebApi.Service.Controllers;
 public class ServiceController(ISender sender) : ApiController(sender)
 {
     [HttpPost]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateService([FromBody] CreateServiceRequest request,
@@ -79,6 +82,7 @@ public class ServiceController(ISender sender) : ApiController(sender)
 
     [HttpPut]
     [Route("{id:guid}")]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
@@ -100,6 +104,7 @@ public class ServiceController(ISender sender) : ApiController(sender)
 
     [HttpDelete]
     [Route("{id:guid}")]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteService([FromRoute] Guid id, CancellationToken cancellationToken)

@@ -5,7 +5,7 @@ using Domain.Shared;
 
 namespace Application.Booking.Queries.GetAllBookings;
 
-public class GetAllBookingsQueryHandler : IQueryHandler<GetAllBookingQuery, List<BookingDto>>
+public class GetAllBookingsQueryHandler : IQueryHandler<GetAllBookingQuery, List<BookingSnapshot>>
 {
     private readonly IBookingRepository _bookingRepository;
 
@@ -14,7 +14,7 @@ public class GetAllBookingsQueryHandler : IQueryHandler<GetAllBookingQuery, List
         _bookingRepository = bookingRepository;
     }
 
-    public async Task<Result<List<BookingDto>>> Handle(GetAllBookingQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<BookingSnapshot>>> Handle(GetAllBookingQuery request, CancellationToken cancellationToken)
     {
         return await _bookingRepository.GetAll(cancellationToken);
     }

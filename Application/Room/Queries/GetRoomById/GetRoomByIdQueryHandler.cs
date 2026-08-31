@@ -6,7 +6,7 @@ using Domain.Shared;
 
 namespace Application.Room.Queries.GetRoomById;
 
-public class GetRoomByIdQueryHandler : IQueryHandler<GetRoomByIdQuery, RoomDto>
+public class GetRoomByIdQueryHandler : IQueryHandler<GetRoomByIdQuery, RoomSnapshot>
 {
     private readonly IRoomRepository _roomRepository;
 
@@ -15,13 +15,13 @@ public class GetRoomByIdQueryHandler : IQueryHandler<GetRoomByIdQuery, RoomDto>
         _roomRepository = roomRepository;
     }
 
-    public async Task<Result<RoomDto>> Handle(GetRoomByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<RoomSnapshot>> Handle(GetRoomByIdQuery request, CancellationToken cancellationToken)
     {
         var room = await _roomRepository.GetById(request.Id, cancellationToken);
 
         if (room is null)
         {
-            return Result.Failure<RoomDto>(RoomErrors.Helpers.NotFound(request.Id));
+            return Result.Failure<RoomSnapshot>(RoomErrors.Helpers.NotFound(request.Id));
         }
 
         return room;

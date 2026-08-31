@@ -22,13 +22,6 @@ public class UpdateRoomByIdCommandHandler : ICommandHandler<UpdateRoomByIdComman
 
     public async Task<Result> Handle(UpdateRoomByIdCommand request, CancellationToken cancellationToken)
     {
-        var oldRoom = await _roomRepository.GetById(request.Id, cancellationToken);
-
-        if (oldRoom is null)
-        {
-            return Result.Failure(RoomErrors.Helpers.NotFound(request.Id));
-        }
-        
         var roomNameResult = RoomName.Create(request.Name);
         if (roomNameResult.IsFailure)
         {
@@ -57,7 +50,7 @@ public class UpdateRoomByIdCommandHandler : ICommandHandler<UpdateRoomByIdComman
             }
         }
 
-        RoomDto newRoom = new(request.Id)
+        RoomSnapshot newRoom = new(request.Id)
         {
             Name = roomNameResult.Value,
             Capacity = roomCapacityResult.Value,
@@ -65,9 +58,13 @@ public class UpdateRoomByIdCommandHandler : ICommandHandler<UpdateRoomByIdComman
             Services = request.Services
         };
         
-        await _roomRepository.TryUpdate(newRoom, cancellationToken);
+        bool updated = await _roomRepository.TryUpdate(newRoom, cancellationToken);
+        if (!updated)
+        {
+            return Result.Failure(RoomErrors.Helpers.NotFound(request.Id));
+        }
+        
         await _unitOfWork.SaveChanges(cancellationToken);
-
         return Result.Success();
     }
 }

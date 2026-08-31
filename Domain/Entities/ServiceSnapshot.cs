@@ -3,16 +3,16 @@ using Domain.ValueObjects.Service;
 
 namespace Domain.Entities;
 
-public class ServiceDto(Guid id) : Entity(id)
+public class ServiceSnapshot(Guid id) : Entity(id)
 {
     public required ServiceName Name { get; init; }
     public required ServicePrice Price { get; init; }
 
-    public static ServiceDto Create(ServiceName serviceName, ServicePrice servicePrice)
+    public static ServiceSnapshot Create(ServiceName serviceName, ServicePrice servicePrice)
     {
         Guid id = Guid.NewGuid();
 
-        return new ServiceDto(id)
+        return new ServiceSnapshot(id)
         {
             Name = serviceName,
             Price = servicePrice

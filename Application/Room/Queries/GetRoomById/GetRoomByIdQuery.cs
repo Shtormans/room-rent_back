@@ -3,4 +3,4 @@ using Domain.Entities;
 
 namespace Application.Room.Queries.GetRoomById;
 
-public record struct GetRoomByIdQuery(Guid Id) : IQuery<RoomDto>;
+public record struct GetRoomByIdQuery(Guid Id) : IQuery<RoomSnapshot>;

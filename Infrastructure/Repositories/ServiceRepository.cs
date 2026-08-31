@@ -7,36 +7,37 @@ namespace Infrastructure.Repositories;
 
 public class ServiceRepository(ApplicationDbContext dbContext) : IServiceRepository
 {
-    public void Add(ServiceDto service)
+    public void Add(ServiceSnapshot service)
     {
         Service entity = ConvertToEntity(service);
         dbContext.Set<Service>().Add(entity);
     }
 
-    public async Task<List<ServiceDto>> GetAll(CancellationToken cancellationToken)
+    public async Task<List<ServiceSnapshot>> GetAll(CancellationToken cancellationToken)
     {
         return await dbContext
             .Set<Service>()
             .AsNoTracking()
-            .Select(service => ConvertToDto(service))
+            .Select(service => ConvertToSnapshot(service))
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<ServiceDto?> GetById(Guid id, CancellationToken cancellationToken)
+    public async Task<ServiceSnapshot?> GetById(Guid id, CancellationToken cancellationToken)
     {
         Service? service = await GetDatabaseObjectById(id, false, cancellationToken);
-        return service is null ? null : ConvertToDto(service);
+        return service is null ? null : ConvertToSnapshot(service);
     }
 
     public async Task<bool> Exists(Guid id, CancellationToken cancellationToken)
     {
         return await dbContext
             .Set<Service>()
+            .AsNoTracking()
             .Where(service => service.Id == id)
             .AnyAsync(cancellationToken);
     }
 
-    public async Task<bool> TryUpdate(ServiceDto updatedService, CancellationToken cancellationToken)
+    public async Task<bool> TryUpdate(ServiceSnapshot updatedService, CancellationToken cancellationToken)
     {
         Service? service = await GetDatabaseObjectById(updatedService.Id, true, cancellationToken);
         
@@ -72,25 +73,25 @@ public class ServiceRepository(ApplicationDbContext dbContext) : IServiceReposit
         return await query.FirstOrDefaultAsync(service => service.Id == id, cancellationToken);
     }
 
-    private static ServiceDto ConvertToDto(Service entity)
+    private static ServiceSnapshot ConvertToSnapshot(Service entity)
     {
         var nameResult = ServiceName.Create(entity.Name);
         var priceResult = ServicePrice.Create(entity.Price);
         
-        return new ServiceDto(entity.Id)
+        return new ServiceSnapshot(entity.Id)
         {
             Name = nameResult.Value,
             Price = priceResult.Value
         };
     }
     
-    private static Service ConvertToEntity(ServiceDto dto)
+    private static Service ConvertToEntity(ServiceSnapshot snapshot)
     {
         return new Service
         {
-            Id = dto.Id,
-            Name = dto.Name,
-            Price = dto.Price
+            Id = snapshot.Id,
+            Name = snapshot.Name,
+            Price = snapshot.Price
         };
     }
 }

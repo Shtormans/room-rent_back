@@ -8,21 +8,22 @@ namespace Infrastructure.Repositories;
 
 public class RoomRepository(ApplicationDbContext dbContext) : IRoomRepository
 {
-    public void Add(RoomDto room)
+    public void Add(RoomSnapshot room)
     {
         Room entity = ConvertToEntity(room);
         dbContext.Set<Room>().Add(entity);
     }
 
-    public async Task<List<RoomDto>> GetAll(CancellationToken cancellationToken)
+    public async Task<List<RoomSnapshot>> GetAll(CancellationToken cancellationToken)
     {
         return await dbContext.Set<Room>()
+            .AsNoTracking()
             .Include(room => room.RoomServices)
-            .Select(room => ConvertToDto(room))
+            .Select(room => ConvertToSnapshot(room))
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<RoomDto?> GetById(Guid id, CancellationToken cancellationToken)
+    public async Task<RoomSnapshot?> GetById(Guid id, CancellationToken cancellationToken)
     {
         Room? room = await GetDatabaseObjectById(id, false, cancellationToken);
 
@@ -31,10 +32,10 @@ public class RoomRepository(ApplicationDbContext dbContext) : IRoomRepository
             return null;
         }
 
-        return ConvertToDto(room);
+        return ConvertToSnapshot(room);
     }
 
-    public async Task<bool> TryUpdate(RoomDto updatedRoom, CancellationToken cancellationToken)
+    public async Task<bool> TryUpdate(RoomSnapshot updatedRoom, CancellationToken cancellationToken)
     {
         Room? room = await GetDatabaseObjectById(updatedRoom.Id, true, cancellationToken);
 
@@ -78,13 +79,13 @@ public class RoomRepository(ApplicationDbContext dbContext) : IRoomRepository
         return await query.FirstOrDefaultAsync(room => room.Id == id, cancellationToken);
     }
 
-    private static RoomDto ConvertToDto(Room entity)
+    private static RoomSnapshot ConvertToSnapshot(Room entity)
     {
         var nameResult = RoomName.Create(entity.Name);
         var capacityResult = RoomCapacity.Create(entity.Capacity);
         var baseRentalRate = RoomRentalRate.Create(entity.BaseRentalRate);
 
-        return new RoomDto(entity.Id)
+        return new RoomSnapshot(entity.Id)
         {
             Name = nameResult.Value,
             Capacity = capacityResult.Value,
@@ -93,22 +94,22 @@ public class RoomRepository(ApplicationDbContext dbContext) : IRoomRepository
         };
     }
 
-    private static Room ConvertToEntity(RoomDto dto)
+    private static Room ConvertToEntity(RoomSnapshot snapshot)
     {
-        List<RoomService> roomServices = dto
+        List<RoomService> roomServices = snapshot
             .Services
             .Select(serviceId => new RoomService
             {
-                RoomId = dto.Id,
+                RoomId = snapshot.Id,
                 ServiceId = serviceId
             }).ToList();
 
         return new Room
         {
-            Id = dto.Id,
-            Name = dto.Name,
-            Capacity = dto.Capacity,
-            BaseRentalRate = dto.BaseRentalRate,
+            Id = snapshot.Id,
+            Name = snapshot.Name,
+            Capacity = snapshot.Capacity,
+            BaseRentalRate = snapshot.BaseRentalRate,
             RoomServices = roomServices
         };
     }

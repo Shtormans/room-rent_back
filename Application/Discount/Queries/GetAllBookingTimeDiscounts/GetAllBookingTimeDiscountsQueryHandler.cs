@@ -5,7 +5,7 @@ using Domain.Shared;
 
 namespace Application.Discount.Queries.GetAllBookingTimeDiscounts;
 
-public class GetAllBookingTimeDiscountsQueryHandler : IQueryHandler<GetAllBookingTimeDiscountsQuery, List<BookingTimeDiscountDto>>
+public class GetAllBookingTimeDiscountsQueryHandler : IQueryHandler<GetAllBookingTimeDiscountsQuery, List<BookingTimeDiscountSnapshot>>
 {
     private readonly IBookingTimeDiscountRepository _bookingTimeDiscountRepository;
 
@@ -14,7 +14,7 @@ public class GetAllBookingTimeDiscountsQueryHandler : IQueryHandler<GetAllBookin
         _bookingTimeDiscountRepository = bookingTimeDiscountRepository;
     }
 
-    public async Task<Result<List<BookingTimeDiscountDto>>> Handle(GetAllBookingTimeDiscountsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<BookingTimeDiscountSnapshot>>> Handle(GetAllBookingTimeDiscountsQuery request, CancellationToken cancellationToken)
     {
         return await _bookingTimeDiscountRepository.GetAll(cancellationToken);
     }

@@ -5,7 +5,7 @@ using Domain.Shared;
 
 namespace Application.Room.Queries.GetAllRooms;
 
-public class GetAllRoomsQueryHandler : IQueryHandler<GetAllRoomsQuery, List<RoomDto>>
+public class GetAllRoomsQueryHandler : IQueryHandler<GetAllRoomsQuery, List<RoomSnapshot>>
 {
     private readonly IRoomRepository _roomRepository;
 
@@ -14,7 +14,7 @@ public class GetAllRoomsQueryHandler : IQueryHandler<GetAllRoomsQuery, List<Room
         _roomRepository = roomRepository;
     }
 
-    public async Task<Result<List<RoomDto>>> Handle(GetAllRoomsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<RoomSnapshot>>> Handle(GetAllRoomsQuery request, CancellationToken cancellationToken)
     {
         return await _roomRepository.GetAll(cancellationToken);
     }

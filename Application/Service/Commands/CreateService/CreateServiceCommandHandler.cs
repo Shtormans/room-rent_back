@@ -31,7 +31,7 @@ public class CreateServiceCommandHandler : ICommandHandler<CreateServiceCommand,
             return Result.Failure<Guid>(servicePriceResult.Error);
         }
 
-        ServiceDto service = ServiceDto.Create(serviceNameResult.Value, servicePriceResult.Value);
+        ServiceSnapshot service = ServiceSnapshot.Create(serviceNameResult.Value, servicePriceResult.Value);
         
         _serviceRepository.Add(service);
         await _unitOfWork.SaveChanges(cancellationToken);

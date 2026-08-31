@@ -7,23 +7,54 @@ namespace Infrastructure.Repositories;
 
 public class BookingTimeDiscountRepository(ApplicationDbContext dbContext) : IBookingTimeDiscountRepository
 {
-    public void Add(BookingTimeDiscountDto discount)
+    public void Add(BookingTimeDiscountSnapshot discount)
     {
         BookingTimeDiscount entity = ConvertToEntity(discount);
         dbContext.Set<BookingTimeDiscount>().Add(entity);
     }
 
-    public async Task<List<BookingTimeDiscountDto>> GetAll(CancellationToken cancellationToken)
+    public async Task<List<BookingTimeDiscountSnapshot>> GetAll(CancellationToken cancellationToken)
     {
         return await dbContext.Set<BookingTimeDiscount>()
-            .Select(booking => ConvertToDto(booking))
+            .AsNoTracking()
+            .Select(booking => ConvertToSnapshot(booking))
             .ToListAsync(cancellationToken);
     }
+    
+    public async Task<bool> TryUpdate(BookingTimeDiscountSnapshot updatedService, CancellationToken cancellationToken)
+    {
+        BookingTimeDiscount? entity = await GetDatabaseObjectById(updatedService.Id, true, cancellationToken);
+        
+        if (entity is null)
+        {
+            return false;
+        }
+        
+        entity.From = updatedService.From;
+        entity.To = updatedService.To;
+        entity.DiscountPercentage = updatedService.DiscountPercentage;
 
-    public async Task<BookingTimeDiscountDto?> GetDiscount(TimeOnly bookTime, CancellationToken cancellationToken)
+        return true;
+    }
+
+    public async Task<bool> TryDelete(Guid id, CancellationToken cancellationToken)
+    {
+        BookingTimeDiscount? snapshot = await GetDatabaseObjectById(id, false, cancellationToken);
+        
+        if (snapshot is null)
+        {
+            return false;
+        }
+
+        dbContext.Set<BookingTimeDiscount>().Remove(snapshot);
+        return true;
+    }
+
+    public async Task<BookingTimeDiscountSnapshot?> GetDiscount(TimeOnly bookTime, CancellationToken cancellationToken)
     {
         BookingTimeDiscount? entity = await dbContext
             .Set<BookingTimeDiscount>()
+            .AsNoTracking()
             .FirstOrDefaultAsync(discount => bookTime.IsBetween(discount.From, discount.To), cancellationToken);
 
         if (entity == null)
@@ -31,7 +62,7 @@ public class BookingTimeDiscountRepository(ApplicationDbContext dbContext) : IBo
             return null;
         }
         
-        return ConvertToDto(entity);
+        return ConvertToSnapshot(entity);
     }
     
     private async Task<BookingTimeDiscount?> GetDatabaseObjectById(Guid id, bool withTracking, CancellationToken cancellationToken)
@@ -42,9 +73,9 @@ public class BookingTimeDiscountRepository(ApplicationDbContext dbContext) : IBo
         return await query.FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
     }
     
-    private static BookingTimeDiscountDto ConvertToDto(BookingTimeDiscount entity)
+    private static BookingTimeDiscountSnapshot ConvertToSnapshot(BookingTimeDiscount entity)
     {
-        return new BookingTimeDiscountDto(entity.Id)
+        return new BookingTimeDiscountSnapshot(entity.Id)
         {
             From = entity.From,
             To = entity.To,
@@ -52,14 +83,14 @@ public class BookingTimeDiscountRepository(ApplicationDbContext dbContext) : IBo
         };
     }
 
-    private static BookingTimeDiscount ConvertToEntity(BookingTimeDiscountDto dto)
+    private static BookingTimeDiscount ConvertToEntity(BookingTimeDiscountSnapshot snapshot)
     {
         return new BookingTimeDiscount
         {
-            Id = dto.Id,
-            From = dto.From,
-            To = dto.To,
-            DiscountPercentage = dto.DiscountPercentage
+            Id = snapshot.Id,
+            From = snapshot.From,
+            To = snapshot.To,
+            DiscountPercentage = snapshot.DiscountPercentage
         };
     }
 }

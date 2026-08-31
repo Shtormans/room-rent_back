@@ -3,4 +3,4 @@ using Domain.Entities;
 
 namespace Application.Booking.Queries.GetBookingById;
 
-public record struct GetBookingByIdQuery(Guid Id) : IQuery<BookingDto>;
+public record struct GetBookingByIdQuery(Guid Id) : IQuery<BookingSnapshot>;

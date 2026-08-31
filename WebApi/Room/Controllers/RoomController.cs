@@ -6,8 +6,10 @@ using Application.Room.Queries.GetRoomById;
 using Domain.Errors;
 using Domain.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Abstractions;
+using WebApi.Constants;
 using WebApi.Room.Requests;
 using WebApi.Room.Responses;
 
@@ -18,6 +20,7 @@ namespace WebApi.Room.Controllers;
 public class RoomController(ISender sender) : ApiController(sender)
 {
     [HttpPost]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateRoom([FromBody] CreateRoomRequest request, CancellationToken cancellationToken)
@@ -82,10 +85,11 @@ public class RoomController(ISender sender) : ApiController(sender)
 
     [HttpPut]
     [Route("{id:guid}")]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateRoom([FromRoute] Guid id, [FromBody] UpdateRoomResponse request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateRoom([FromRoute] Guid id, [FromBody] UpdateRoomRequest request, CancellationToken cancellationToken)
     {
         UpdateRoomByIdCommand command = new(id, request.Name, request.Capacity, request.BaseRentalRate, request.Services);
         var result = await Sender.Send(command, cancellationToken);
@@ -102,6 +106,7 @@ public class RoomController(ISender sender) : ApiController(sender)
 
     [HttpDelete]
     [Route("{id:guid}")]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteRoom(Guid id, CancellationToken cancellationToken)

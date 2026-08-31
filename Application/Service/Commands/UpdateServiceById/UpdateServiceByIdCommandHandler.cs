@@ -32,7 +32,7 @@ public class UpdateServiceByIdCommandHandler : ICommandHandler<UpdateServiceById
             return Result.Failure<Guid>(servicePriceResult.Error);
         }
 
-        ServiceDto newService = new(request.Id)
+        ServiceSnapshot newService = new(request.Id)
         {
             Name = serviceNameResult.Value,
             Price = servicePriceResult.Value
